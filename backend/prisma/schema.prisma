@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AdminRole {
+  ADMIN
+}
+
+enum PropertyStatus {
+  DRAFT
+  AVAILABLE
+  RESERVED
+  RENTED
+  INACTIVE
+  ARCHIVED
+}
+
+enum FurnishingStatus {
+  FURNISHED
+  SEMI_FURNISHED
+  UNFURNISHED
+}
+
+enum PreferredTenant {
+  ANY
+  FAMILY
+  BACHELOR_MALE
+  BACHELOR_FEMALE
+  STUDENTS
+  WORKING_PROFESSIONALS
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  VISIT_SCHEDULED
+  NEGOTIATING
+  CONVERTED
+  CLOSED
+  LOST
+}
+
+enum VisitStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  MISSED
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(ADMIN)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Owner {
+  id             String     @id @default(uuid())
+  name           String
+  phone          String
+  alternatePhone String?
+  email          String?
+  address        String?
+  notes          String?
+  properties     Property[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([phone])
+}
+
+model PropertyType {
+  id         String     @id @default(uuid())
+  name       String
+  slug       String     @unique
+  active     Boolean    @default(true)
+  sortOrder  Int        @default(0)
+  properties Property[]
+}
+
+model Amenity {
+  id         String             @id @default(uuid())
+  name       String
+  slug       String             @unique
+  icon       String?
+  active     Boolean            @default(true)
+  properties PropertyAmenity[]
+}
+
+model Property {
+  id                String             @id @default(uuid())
+  propertyCode      String             @unique
+  title             String
+  slug              String             @unique
+  description       String
+  propertyTypeId    String
+  propertyType      PropertyType       @relation(fields: [propertyTypeId], references: [id])
+  roomType          String?
+  monthlyRent       Int
+  securityDeposit   Int?
+  maintenanceCharge Int?
+  otherCharges      String?
+  address           String
+  locality          String
+  city              String
+  state             String
+  postalCode        String?
+  latitude          Float
+  longitude         Float
+  furnishingStatus  FurnishingStatus
+  availableFrom     DateTime?
+  preferredTenant   PreferredTenant    @default(ANY)
+  genderPreference  String?
+  bedrooms          Int?
+  bathrooms         Int?
+  attachedBathroom  Boolean            @default(false)
+  floor             Int?
+  totalFloors       Int?
+  status            PropertyStatus     @default(DRAFT)
+  featured          Boolean            @default(false)
+  verified          Boolean            @default(true)
+  rules             String[]           @default([])
+  nearbyLandmarks   String[]           @default([])
+  ownerId           String
+  owner             Owner              @relation(fields: [ownerId], references: [id])
+  images            PropertyImage[]
+  amenities         PropertyAmenity[]
+  enquiries         Enquiry[]
+  scheduledVisits   ScheduledVisit[]
+  archivedAt        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([status, archivedAt])
+  @@index([locality])
+  @@index([city])
+  @@index([monthlyRent])
+  @@index([latitude, longitude])
+  @@index([createdAt])
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  alt        String?
+  isCover    Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([propertyId, isCover])
+}
+
+model PropertyAmenity {
+  propertyId String
+  amenityId  String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, amenityId])
+}
+
+model Enquiry {
+  id            String        @id @default(uuid())
+  propertyId    String?
+  property      Property?     @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  customerName  String
+  phone         String
+  email         String?
+  message       String?
+  source        String        @default("Website")
+  status        EnquiryStatus @default(NEW)
+  internalNotes String?
+  followUpAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  visits        ScheduledVisit[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([phone])
+}
+
+model ScheduledVisit {
+  id          String      @id @default(uuid())
+  propertyId  String
+  property    Property    @relation(fields: [propertyId], references: [id])
+  enquiryId   String?
+  enquiry     Enquiry?    @relation(fields: [enquiryId], references: [id], onDelete: SetNull)
+  visitorName String
+  phone       String
+  scheduledAt DateTime
+  status      VisitStatus @default(SCHEDULED)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+model AppSettings {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
