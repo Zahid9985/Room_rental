@@ -35,11 +35,11 @@ export const createEnquiry = async (rawBody: unknown) => {
   const enquiry = await prisma.enquiry.create({
     data: {
       propertyId: body.propertyId,
-      customerName: body.customerName,
-      phone: body.phone,
+      customerName: body.customerName || "WhatsApp visitor",
+      phone: body.phone || body.contactMethod || "WHATSAPP_CLICK",
       email: body.email || undefined,
       message: body.message,
-      source: body.source
+      source: body.contactMethod ? body.contactMethod : body.source
     },
     include: enquiryInclude
   });

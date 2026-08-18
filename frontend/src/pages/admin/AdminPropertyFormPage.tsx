@@ -255,7 +255,7 @@ export const AdminPropertyFormPage = () => {
           </div>
           <div className="split-fields">
             <label className="field"><span>Available from</span><input type="date" value={form.availableFrom} onChange={(e) => set("availableFrom", e.target.value)} /></label>
-            <label className="field"><span>Status</span><select value={form.status} onChange={(e) => set("status", e.target.value)}>{propertyStatuses.filter((status) => status !== "ARCHIVED").map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
+            <label className="field"><span>Status</span><select value={form.status} onChange={(e) => set("status", e.target.value)}>{propertyStatuses.filter((status) => !["ARCHIVED", "RESERVED"].includes(status)).map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
           </div>
           <div className="check-grid">
             <label className="check-row"><input type="checkbox" checked={form.attachedBathroom} onChange={(e) => set("attachedBathroom", e.target.checked)} /> Attached bathroom</label>

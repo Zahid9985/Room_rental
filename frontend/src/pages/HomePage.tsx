@@ -1,124 +1,173 @@
-import { useEffect, useState } from "react";
-import { ArrowRight, Building2, CheckCircle2, LocateFixed, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Filter, Search } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { getApiMessage } from "../api/client";
 import { publicApi } from "../api/publicApi";
-import type { Property } from "../api/types";
-import { PropertyCard } from "../components/PropertyCard";
+import type { Paginated, Property, PropertyType, Settings } from "../api/types";
+import { EmptyState } from "../components/EmptyState";
 import { PropertyGridSkeleton } from "../components/LoadingSkeleton";
-import { useGeolocation } from "../hooks/useGeolocation";
-import { useSavedProperties } from "../hooks/useSavedProperties";
+import { PropertyCard } from "../components/PropertyCard";
+import { PropertyDetailsModal } from "../components/PropertyDetailsModal";
 import { useToast } from "../context/ToastContext";
 
-const steps = [
-  "Share your location",
-  "Discover nearby rooms",
-  "Compare properties",
-  "Contact and visit"
-];
+interface HomeFilters {
+  search: string;
+  propertyType: string;
+  minRent: string;
+  maxRent: string;
+}
+
+const defaultFilters: HomeFilters = {
+  search: "",
+  propertyType: "",
+  minRent: "",
+  maxRent: ""
+};
 
 export const HomePage = () => {
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { addToast } = useToast();
-  const { coords, status, error, requestLocation } = useGeolocation();
-  const { isSaved, toggleSaved } = useSavedProperties();
-  const [featured, setFeatured] = useState<Property[]>([]);
+  const [settings, setSettings] = useState<Settings | null>(null);
+  const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
+  const [result, setResult] = useState<Paginated<Property> | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [filters, setFilters] = useState<HomeFilters>(defaultFilters);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    Promise.all([publicApi.settings(), publicApi.propertyTypes()])
+      .then(([settingsData, types]) => {
+        setSettings(settingsData);
+        setPropertyTypes(types);
+      })
+      .catch((error) => addToast(getApiMessage(error), "error"));
+  }, [addToast]);
+
+  useEffect(() => {
+    setLoading(true);
+    setErrorMessage(null);
     publicApi
-      .featuredProperties()
-      .then(setFeatured)
-      .catch(() => setFeatured([]))
+      .listProperties({
+        search: filters.search || undefined,
+        propertyType: filters.propertyType || undefined,
+        minRent: filters.minRent ? Number(filters.minRent) : undefined,
+        maxRent: filters.maxRent ? Number(filters.maxRent) : undefined,
+        sort: "recent",
+        limit: 32
+      })
+      .then(setResult)
+      .catch((error) => setErrorMessage(getApiMessage(error)))
       .finally(() => setLoading(false));
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
-    if (status === "granted" && coords) {
-      navigate(`/explore?lat=${coords.lat}&lng=${coords.lng}&radius=5`);
-    }
-    if (status === "denied" && error) {
-      addToast(error, "info");
-      navigate("/explore");
-    }
-  }, [status, coords, error, navigate, addToast]);
+    const slug = searchParams.get("property");
+    if (!slug || !result?.items.length) return;
+    const property = result.items.find((item) => item.slug === slug);
+    if (property) setSelectedProperty(property);
+  }, [result, searchParams]);
+
+  const pageTitle = settings?.websiteName || settings?.businessName || "SS Room Rentals";
+  const tagline = settings?.shortTagline || "Discover available rooms near you.";
+  const properties = result?.items ?? [];
+  const hasFilters = useMemo(
+    () => Boolean(filters.search || filters.propertyType || filters.minRent || filters.maxRent),
+    [filters]
+  );
 
   return (
-    <>
-      <section className="hero-section">
-        <img className="hero-bg" src="/room_rent.jpeg" alt="Premium room rental interface preview" />
-        <div className="hero-overlay" />
-        <div className="hero-content">
-          <p className="eyebrow">Verified rentals in Berhampore</p>
-          <h1>Your next room is closer than you think.</h1>
-          <p>
-            Discover rooms, PGs, and apartments around your current location with clear pricing,
-            verified listings, map search, and fast enquiries through SS Room Rentals.
-          </p>
-          <div className="hero-actions">
-            <button className="primary-button" onClick={requestLocation} disabled={status === "loading"}>
-              <LocateFixed size={18} />
-              {status === "loading" ? "Finding nearby rooms..." : "Find Rooms Near Me"}
-            </button>
-            <Link to="/explore" className="secondary-button">
-              Explore Properties <ArrowRight size={18} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="content-band">
-        <div className="section-heading">
-          <p className="eyebrow">Recently added</p>
-          <h2>Featured rooms</h2>
-          <Link to="/explore">See all</Link>
-        </div>
-        {loading ? (
-          <PropertyGridSkeleton count={3} />
-        ) : (
-          <div className="property-grid">
-            {featured.slice(0, 6).map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                saved={isSaved(property.id)}
-                onToggleSaved={toggleSaved}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="content-band compact-band">
-        <div className="category-grid">
-          {["Single Room", "PG", "1 BHK", "Shared Room"].map((category) => (
-            <Link to={`/explore?search=${encodeURIComponent(category)}`} className="category-tile" key={category}>
-              <Building2 size={22} />
-              <span>{category}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="content-band split-band">
+    <section className="home-catalogue-page">
+      <div className="catalogue-intro">
         <div>
-          <p className="eyebrow">Why SS</p>
-          <h2>Simple room discovery, handled by a real middleman.</h2>
-          <div className="benefit-list">
-            <span><ShieldCheck size={18} /> Verified broker-led listings</span>
-            <span><MapPin size={18} /> Radius search around your location</span>
-            <span><MessageCircle size={18} /> Enquiries tracked for follow-up</span>
-          </div>
+          <p className="eyebrow">{settings?.operatingCity || settings?.serviceCity || "Room discovery"}</p>
+          <h1>Find Your Next Room</h1>
+          <p>{tagline}</p>
         </div>
-        <div className="steps-panel">
-          {steps.map((step, index) => (
-            <div className="step-row" key={step}>
-              <span>{index + 1}</span>
-              <strong>{step}</strong>
-              <CheckCircle2 size={18} />
-            </div>
+        <div className="catalogue-intro-card">
+          <strong>{pageTitle}</strong>
+          <span>Middleman-managed verified room listings</span>
+        </div>
+      </div>
+
+      <div className="catalogue-toolbar">
+        <label className="field search-field">
+          <span>Search rooms</span>
+          <div className="input-with-icon">
+            <Search size={17} />
+            <input
+              value={filters.search}
+              onChange={(event) => setFilters({ ...filters, search: event.target.value })}
+              placeholder="Locality, property name, BRP-0012"
+            />
+          </div>
+        </label>
+        <label className="field compact-select">
+          <span>Type</span>
+          <select value={filters.propertyType} onChange={(event) => setFilters({ ...filters, propertyType: event.target.value })}>
+            <option value="">All rooms</option>
+            {propertyTypes.map((type) => (
+              <option key={type.id} value={type.slug}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field compact-select">
+          <span>Min rent</span>
+          <input
+            type="number"
+            min="0"
+            value={filters.minRent}
+            onChange={(event) => setFilters({ ...filters, minRent: event.target.value })}
+            placeholder="₹"
+          />
+        </label>
+        <label className="field compact-select">
+          <span>Max rent</span>
+          <input
+            type="number"
+            min="0"
+            value={filters.maxRent}
+            onChange={(event) => setFilters({ ...filters, maxRent: event.target.value })}
+            placeholder="₹"
+          />
+        </label>
+        {hasFilters && (
+          <button type="button" className="ghost-button" onClick={() => setFilters(defaultFilters)}>
+            <Filter size={17} />
+            Clear
+          </button>
+        )}
+      </div>
+
+      <div className="catalogue-count">
+        <span>{result?.total ?? 0} available rooms</span>
+      </div>
+
+      {loading && <PropertyGridSkeleton count={8} />}
+      {!loading && errorMessage && <EmptyState title="Rooms could not be loaded" message={errorMessage} />}
+      {!loading && !errorMessage && properties.length === 0 && (
+        <EmptyState
+          title={hasFilters ? "No rooms found for this search." : "No rooms are currently available."}
+          message="Try a different locality, price range, or room type."
+        />
+      )}
+      {!loading && !errorMessage && properties.length > 0 && (
+        <div className="property-grid catalogue-grid">
+          {properties.map((property) => (
+            <PropertyCard key={property.id} property={property} onOpen={setSelectedProperty} />
           ))}
         </div>
-      </section>
-    </>
+      )}
+
+      {selectedProperty && settings && (
+        <PropertyDetailsModal
+          property={selectedProperty}
+          settings={settings}
+          onClose={() => setSelectedProperty(null)}
+        />
+      )}
+    </section>
   );
 };

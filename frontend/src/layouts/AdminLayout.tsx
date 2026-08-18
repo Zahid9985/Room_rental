@@ -1,14 +1,4 @@
-import {
-  Building2,
-  CalendarDays,
-  Home,
-  LayoutDashboard,
-  LogOut,
-  MessageSquareText,
-  Plus,
-  Settings,
-  UsersRound
-} from "lucide-react";
+import { Building2, Home, LayoutDashboard, LogOut, MessageSquareText, Plus, Settings } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Logo } from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
@@ -17,9 +7,7 @@ const adminLinks = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/properties", label: "Properties", icon: Building2 },
   { to: "/admin/properties/new", label: "Add Property", icon: Plus },
-  { to: "/admin/enquiries", label: "Enquiries", icon: MessageSquareText },
-  { to: "/admin/visits", label: "Scheduled Visits", icon: CalendarDays },
-  { to: "/admin/owners", label: "Owners", icon: UsersRound },
+  { to: "/admin/enquiries", label: "Contacts / Enquiries", icon: MessageSquareText },
   { to: "/admin/settings", label: "Settings", icon: Settings }
 ];
 
@@ -56,7 +44,7 @@ export const AdminLayout = () => {
         <header className="admin-topbar">
           <div>
             <p className="eyebrow">Admin</p>
-            <h1>{admin?.name || "SS Room Rentals"}</h1>
+            <h1>{admin?.name || "Room Rental Admin"}</h1>
           </div>
           <NavLink to="/" className="secondary-button">
             <Home size={18} />

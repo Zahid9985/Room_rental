@@ -50,10 +50,12 @@ export const publicApi = {
   },
   createEnquiry: async (payload: {
     propertyId?: string;
-    customerName: string;
-    phone: string;
+    customerName?: string;
+    phone?: string;
     email?: string;
     message?: string;
+    contactMethod?: "WHATSAPP" | "CALL" | "FORM";
+    source?: string;
   }) => {
     const response = await api.post<{
       enquiry: unknown;

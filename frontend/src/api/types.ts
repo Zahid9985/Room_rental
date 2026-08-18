@@ -120,9 +120,19 @@ export interface Visit {
 
 export interface Settings {
   businessName: string;
+  contactPerson?: string;
   contactPhone: string;
   whatsappNumber: string;
-  serviceCity: string;
+  email?: string;
+  address?: string;
+  businessHours?: string;
+  operatingCity?: string;
+  mapCenterLat?: number | string;
+  mapCenterLng?: number | string;
+  defaultMapZoom?: number | string;
+  websiteName?: string;
+  shortTagline?: string;
+  serviceCity?: string;
   defaultSearchRadiusKm: number | string;
 }
 
@@ -130,6 +140,7 @@ export interface DashboardStats {
   totalProperties: number;
   availableProperties: number;
   rentedProperties: number;
+  inactiveProperties: number;
   newEnquiries: number;
   todaysEnquiries: number;
   scheduledVisits: number;

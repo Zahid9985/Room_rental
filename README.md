@@ -1,77 +1,65 @@
 # SS Room Rentals
 
-A full-stack room rental discovery and lead-management MVP for Berhampore, West Bengal.
+A simplified full-stack room-discovery website for a middleman-operated rental business.
 
-The product helps public users find verified rooms, PGs, and rental properties near their current location. The business owner acts as the middleman: owners do not log in for V1, while the admin manages properties, owners, enquiries, scheduled visits, and contact settings.
+Public customers only browse rooms, open a room details modal, view rooms on a map, and contact the business on WhatsApp. Customers do not register, log in, book online, pay online, or see private property-owner information.
+
+## Product Shape
+
+Public routes:
+
+- `/` - Home catalogue with room cards, search, and simple filters
+- `/map` - Dynamic property map using database coordinates
+- `/contact` - Business/middleman contact information
+
+Admin routes:
+
+- `/admin/login`
+- `/admin/dashboard`
+- `/admin/properties`
+- `/admin/properties/new`
+- `/admin/properties/:id/edit`
+- `/admin/enquiries`
+- `/admin/settings`
 
 ## Architecture
 
 ```text
 room_rental_app/
-  frontend/      React + Vite public website and admin panel
+  frontend/      React + Vite customer website and admin panel
   backend/       Node.js + Express REST API
-  backend/prisma PostgreSQL schema and seed data
+  backend/prisma PostgreSQL schema, migration, and seed data
 ```
 
-Backend request flow:
+Backend flow:
 
 ```text
 Route -> Controller -> Service -> Prisma/PostgreSQL
 ```
 
-Frontend structure:
+## Stack
 
-```text
-src/
-  api/          Axios clients and API types
-  components/   reusable cards, filters, map, modal, states
-  context/      auth and toast providers
-  hooks/        geolocation and saved-property storage
-  layouts/      public and admin shells
-  pages/        public and admin routes
-  styles/       responsive dark UI system
-```
-
-## Technology
-
-- Frontend: React, Vite, React Router, React Hook Form, Leaflet, lucide-react
+- Frontend: React, Vite, TypeScript, React Router, Leaflet, lucide-react
 - Backend: Node.js, Express, Helmet, CORS, rate limiting, JWT, bcrypt
 - Database: PostgreSQL
 - ORM: Prisma
 - Maps: Leaflet with OpenStreetMap
-- Uploads: local `backend/uploads` in development with a storage abstraction path
+- Images: local upload paths in development; no image binaries are stored in PostgreSQL
 
-## Assumptions
+## Important Business Rule
 
-- V1 has only public users and admin users.
-- Public users do not need accounts.
-- Owner data is admin-only and is not exposed through public APIs.
-- Nearby search uses Haversine distance with a bounding-box prefilter; the schema can move to PostGIS later.
-- Local file upload storage is used for development. Production should move uploaded images to Cloudinary, S3, or equivalent object storage.
-
-## Prerequisites
-
-- Node.js 22+
-- npm 11+
-- PostgreSQL running locally or a hosted PostgreSQL database
+The property owner’s private contact details are admin-only. Public property APIs serialize only customer-safe listing data. WhatsApp messages go to the configured business/middleman number from settings.
 
 ## Environment
 
-Copy the examples before running the app:
-
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
-
-PowerShell:
+Copy the example files:
 
 ```powershell
 Copy-Item backend/.env.example backend/.env
 Copy-Item frontend/.env.example frontend/.env
 ```
 
-Backend variables:
+Backend:
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/room_rental_app?schema=public"
@@ -82,7 +70,7 @@ FRONTEND_URL="http://localhost:5173"
 UPLOAD_DIR="uploads"
 ```
 
-Frontend variable:
+Frontend:
 
 ```env
 VITE_API_BASE_URL="http://localhost:4000/api"
@@ -90,7 +78,7 @@ VITE_API_BASE_URL="http://localhost:4000/api"
 
 ## Install
 
-```bash
+```powershell
 npm install
 npm run prisma:generate
 ```
@@ -99,12 +87,12 @@ npm run prisma:generate
 
 Create the PostgreSQL database, then run:
 
-```bash
+```powershell
 npm run prisma:migrate -w backend -- --name init
 npm run seed
 ```
 
-An initial generated SQL migration is also included at `backend/prisma/migrations/20260811120000_init/migration.sql`.
+An initial SQL migration is included at `backend/prisma/migrations/20260811120000_init/migration.sql`.
 
 Development admin credentials after seeding:
 
@@ -115,34 +103,33 @@ Password: Admin@12345
 
 ## Run Locally
 
-```bash
+```powershell
 npm run dev
 ```
 
 Default URLs:
 
 - Frontend: `http://localhost:5173`
-- Backend: `http://localhost:4000/api/health`
-- Admin: `http://localhost:5173/admin/login`
+- Backend health: `http://localhost:4000/api/health`
+- Admin login: `http://localhost:5173/admin/login`
 
 ## Build
 
-```bash
+```powershell
 npm run build
 ```
 
-## Public API Overview
+## Public API
 
 - `GET /api/properties`
-- `GET /api/properties/featured`
-- `GET /api/properties/nearby?lat=24.0988&lng=88.2679&radius=5`
+- `GET /api/properties/nearby`
 - `GET /api/properties/:slug`
 - `GET /api/property-types`
 - `GET /api/amenities`
-- `POST /api/enquiries`
 - `GET /api/settings/public`
+- `POST /api/enquiries` for lightweight WhatsApp/contact tracking
 
-## Admin API Overview
+## Admin API
 
 - `POST /api/admin/auth/login`
 - `GET /api/admin/dashboard`
@@ -153,15 +140,7 @@ npm run build
 - `DELETE /api/admin/properties/:id`
 - `GET /api/admin/enquiries`
 - `PATCH /api/admin/enquiries/:id/status`
-- Owner CRUD under `/api/admin/owners`
-- Visit CRUD under `/api/admin/visits`
-- Settings under `/api/admin/settings`
+- `GET /api/admin/settings`
+- `PUT /api/admin/settings`
 
-## Production Notes
-
-- Use a strong `JWT_SECRET`.
-- Restrict `FRONTEND_URL` to the deployed frontend origin.
-- Put PostgreSQL behind backups and connection pooling.
-- Move uploads from local disk to object storage.
-- Add PostGIS when listings grow enough to require database-native geospatial queries.
-- Run migrations in CI/CD before releasing backend changes.
+Owner records and visit APIs remain backend/admin-only support capabilities; they are not exposed in the customer UI.

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Building2, CalendarDays, CheckCircle2, Home, MessageSquareText, TrendingUp } from "lucide-react";
+import { Building2, CheckCircle2, Home, MessageSquareText, Moon, TrendingUp } from "lucide-react";
 import { adminApi } from "../../api/adminApi";
 import type { DashboardStats } from "../../api/types";
 import { getApiMessage } from "../../api/client";
 import { formatCurrency } from "../../utils/format";
 import { useToast } from "../../context/ToastContext";
 
-const statIcons = [Building2, CheckCircle2, Home, MessageSquareText, TrendingUp, CalendarDays];
+const statIcons = [Building2, CheckCircle2, Home, Moon, MessageSquareText, TrendingUp];
 
 export const AdminDashboardPage = () => {
   const { addToast } = useToast();
@@ -22,11 +22,11 @@ export const AdminDashboardPage = () => {
   const cards = stats
     ? [
         ["Total Properties", stats.totalProperties],
-        ["Available Properties", stats.availableProperties],
-        ["Rented Properties", stats.rentedProperties],
-        ["New Enquiries", stats.newEnquiries],
-        ["Today's Enquiries", stats.todaysEnquiries],
-        ["Scheduled Visits", stats.scheduledVisits]
+        ["Available Rooms", stats.availableProperties],
+        ["Rented Rooms", stats.rentedProperties],
+        ["Inactive Rooms", stats.inactiveProperties],
+        ["WhatsApp Clicks / Enquiries", stats.newEnquiries],
+        ["Today's Contacts", stats.todaysEnquiries]
       ]
     : [];
 

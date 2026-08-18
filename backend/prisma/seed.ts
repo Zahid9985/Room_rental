@@ -210,10 +210,20 @@ async function main() {
   await prisma.appSettings.createMany({
     data: [
       { key: "businessName", value: "SS Room Rentals" },
+      { key: "contactPerson", value: "Sourav" },
       { key: "contactPhone", value: "+919876543210" },
       { key: "whatsappNumber", value: "919876543210" },
-      { key: "serviceCity", value: "Berhampore" },
-      { key: "defaultSearchRadiusKm", value: "5" }
+      { key: "email", value: "hello@ssrooms.local" },
+      { key: "address", value: "Bardhaman, West Bengal" },
+      { key: "businessHours", value: "10 AM - 8 PM" },
+      { key: "operatingCity", value: "Bardhaman / Burdwan" },
+      { key: "mapCenterLat", value: "23.2324" },
+      { key: "mapCenterLng", value: "87.8615" },
+      { key: "defaultMapZoom", value: "13" },
+      { key: "websiteName", value: "SS Room Rentals" },
+      { key: "shortTagline", value: "Discover available rooms near you." },
+      { key: "serviceCity", value: "Bardhaman / Burdwan" },
+      { key: "defaultSearchRadiusKm", value: "20" }
     ]
   });
 }

@@ -1,35 +1,50 @@
 import L from "leaflet";
 import { CircleMarker, MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import { Link } from "react-router-dom";
-import type { Property } from "../api/types";
+import type { Property, Settings } from "../api/types";
 import { resolveMediaUrl } from "../api/client";
-import { BERHAMPORE_CENTER } from "../constants/options";
 import { formatCurrency } from "../utils/format";
 
 interface PropertyMapProps {
   properties: Property[];
+  settings?: Settings | null;
   userLocation?: { lat: number; lng: number } | null;
   height?: string;
+  onViewDetails: (property: Property) => void;
 }
 
 const priceIcon = (price: number) =>
   L.divIcon({
     className: "price-marker",
-    html: `<span>${formatCurrency(price).replace(".00", "")}</span>`,
-    iconSize: [96, 36],
-    iconAnchor: [48, 18]
+    html: `<span>${formatCurrency(price)}</span>`,
+    iconSize: [104, 36],
+    iconAnchor: [52, 18]
   });
 
-export const PropertyMap = ({ properties, userLocation, height = "520px" }: PropertyMapProps) => {
+export const PropertyMap = ({
+  properties,
+  settings,
+  userLocation,
+  height = "620px",
+  onViewDetails
+}: PropertyMapProps) => {
+  const mapCenter = {
+    lat: Number(settings?.mapCenterLat || 23.2324),
+    lng: Number(settings?.mapCenterLng || 87.8615)
+  };
   const center = userLocation
     ? [userLocation.lat, userLocation.lng]
     : properties[0]
       ? [properties[0].latitude, properties[0].longitude]
-      : [BERHAMPORE_CENTER.lat, BERHAMPORE_CENTER.lng];
+      : [mapCenter.lat, mapCenter.lng];
 
   return (
     <div className="map-shell" style={{ height }}>
-      <MapContainer center={center as [number, number]} zoom={13} scrollWheelZoom className="map-canvas">
+      <MapContainer
+        center={center as [number, number]}
+        zoom={Number(settings?.defaultMapZoom || 13)}
+        scrollWheelZoom
+        className="map-canvas"
+      >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -52,10 +67,14 @@ export const PropertyMap = ({ properties, userLocation, height = "520px" }: Prop
             <Popup>
               <div className="map-popup">
                 <img src={resolveMediaUrl(property.coverImage)} alt={property.title} />
-                <strong>{property.title}</strong>
+                <strong>
+                  {property.locality}, {property.city}
+                </strong>
                 <span>{formatCurrency(property.monthlyRent)} / month</span>
-                {typeof property.distanceKm === "number" && <span>{property.distanceKm} km away</span>}
-                <Link to={`/properties/${property.slug}`}>View property</Link>
+                <span>{property.propertyType.name}</span>
+                <button type="button" onClick={() => onViewDetails(property)}>
+                  View Details
+                </button>
               </div>
             </Popup>
           </Marker>
