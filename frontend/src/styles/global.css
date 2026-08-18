@@ -428,6 +428,18 @@ p {
   font-weight: 600;
 }
 
+.rent-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  line-height: 1.15;
+}
+
+.rent-line span {
+  white-space: nowrap;
+}
+
 .property-title {
   display: block;
   min-height: 44px;
@@ -446,6 +458,10 @@ p {
   margin-bottom: 8px;
   font-size: 0.86rem;
   line-height: 1.45;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .location-line {
@@ -590,6 +606,7 @@ p {
 .field select,
 .field textarea {
   width: 100%;
+  min-width: 0;
   min-height: 42px;
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -1433,7 +1450,7 @@ p {
 
 .catalogue-toolbar {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) 180px 150px 150px auto;
+  grid-template-columns: minmax(260px, 1fr) minmax(150px, 180px) minmax(125px, 150px) minmax(125px, 150px);
   gap: 12px;
   align-items: end;
   margin-bottom: 14px;
@@ -1441,6 +1458,14 @@ p {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.045);
+}
+
+.catalogue-toolbar.has-action {
+  grid-template-columns: minmax(260px, 1fr) minmax(150px, 180px) minmax(125px, 150px) minmax(125px, 150px) auto;
+}
+
+.catalogue-toolbar .ghost-button {
+  white-space: nowrap;
 }
 
 .compact-select {
@@ -1456,12 +1481,15 @@ p {
 }
 
 .catalogue-grid {
-  grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  align-items: stretch;
 }
 
 .catalogue-card {
   display: grid;
+  grid-template-rows: auto auto 1fr;
   width: 100%;
+  min-width: 0;
   padding: 0;
   text-align: left;
   cursor: pointer;
@@ -1479,9 +1507,22 @@ p {
   font-weight: 900;
 }
 
+.catalogue-card-location svg {
+  flex: 0 0 auto;
+}
+
+.catalogue-card-location span {
+  min-width: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .catalogue-card-code {
   display: inline-flex;
   width: fit-content;
+  max-width: 100%;
   min-height: 28px;
   align-items: center;
   padding: 0 9px;
@@ -1490,6 +1531,9 @@ p {
   background: rgba(255, 255, 255, 0.06);
   font-size: 0.78rem;
   font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .catalogue-card-title {
@@ -1499,6 +1543,10 @@ p {
   color: #fff;
   font-size: 0.98rem;
   line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .catalogue-card-footer {
@@ -1512,6 +1560,7 @@ p {
   color: var(--accent);
   font-size: 0.82rem;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .property-details-modal {
@@ -1716,6 +1765,10 @@ p {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .catalogue-grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+
   .stat-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1906,33 +1959,130 @@ p {
 
   .catalogue-intro,
   .map-page-heading,
-  .catalogue-toolbar,
   .modal-highlight-row,
   .modal-section-grid {
     grid-template-columns: 1fr;
   }
 
+  .catalogue-intro {
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 16px;
+  }
+
+  .catalogue-intro h1,
+  .map-page-heading h1 {
+    font-size: 2.3rem;
+    line-height: 1.05;
+  }
+
+  .catalogue-intro p,
+  .map-page-heading p {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+  }
+
   .catalogue-intro-card {
+    min-width: 0;
+    padding: 12px;
+  }
+
+  .catalogue-toolbar,
+  .catalogue-toolbar.has-action {
+    grid-template-columns: minmax(220px, 1fr) 124px 104px 104px;
+    gap: 8px;
+    align-items: end;
+    max-width: 100%;
+    margin-bottom: 12px;
+    padding: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .catalogue-toolbar.has-action {
+    grid-template-columns: minmax(220px, 1fr) 124px 104px 104px 86px;
+  }
+
+  .catalogue-toolbar .field {
     min-width: 0;
   }
 
+  .catalogue-toolbar .field span {
+    white-space: nowrap;
+  }
+
+  .catalogue-toolbar .ghost-button {
+    min-width: 86px;
+    padding: 0 10px;
+  }
+
   .catalogue-grid {
-    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
+  .property-card-image {
+    aspect-ratio: 4 / 3;
+  }
+
+  .property-card-body {
+    padding: 10px;
+  }
+
   .catalogue-card-location {
-    min-height: 48px;
-    font-size: 0.9rem;
+    min-height: 44px;
+    padding: 10px;
+    font-size: 0.84rem;
   }
 
   .rent-line {
-    font-size: 1.12rem;
+    margin-bottom: 6px;
+    font-size: 1.05rem;
+  }
+
+  .rent-line span {
+    font-size: 0.72rem;
+  }
+
+  .catalogue-card-title {
+    min-height: 38px;
+    margin-bottom: 6px;
+    font-size: 0.88rem;
   }
 
   .compact-line {
-    min-height: 48px;
-    font-size: 0.78rem;
+    min-height: 38px;
+    font-size: 0.76rem;
+  }
+
+  .catalogue-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .catalogue-card-code {
+    min-height: 25px;
+    padding: 0 7px;
+    font-size: 0.7rem;
+  }
+
+  .view-details-cue {
+    font-size: 0.76rem;
+  }
+
+  .glass-badge {
+    min-height: 24px;
+    padding: 0 7px;
+    font-size: 0.7rem;
+  }
+
+  .property-code {
+    top: 8px;
+    left: 8px;
   }
 
   .modal-backdrop {

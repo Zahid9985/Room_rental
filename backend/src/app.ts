@@ -19,7 +19,11 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || origin === env.FRONTEND_URL) {
+      const isLocalDevOrigin =
+        env.NODE_ENV === "development" &&
+        Boolean(origin?.match(/^http:\/\/(localhost|127\.0\.0\.1):\d+$/));
+
+      if (!origin || origin === env.FRONTEND_URL || isLocalDevOrigin) {
         callback(null, true);
         return;
       }

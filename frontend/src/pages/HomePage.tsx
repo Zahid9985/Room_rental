@@ -90,7 +90,7 @@ export const HomePage = () => {
         </div>
       </div>
 
-      <div className="catalogue-toolbar">
+      <div className={`catalogue-toolbar${hasFilters ? " has-action" : ""}`}>
         <label className="field search-field">
           <span>Search rooms</span>
           <div className="input-with-icon">
