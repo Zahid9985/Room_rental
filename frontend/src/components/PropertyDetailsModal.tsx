@@ -14,7 +14,7 @@ interface PropertyDetailsModalProps {
   onClose: () => void;
 }
 
-const hasValue = (value: unknown) => value !== null && value !== undefined && value !== "" && value !== 0;
+const hasValue = (value: unknown) => value !== null && value !== undefined && value !== "";
 
 export const PropertyDetailsModal = ({ property, settings, onClose }: PropertyDetailsModalProps) => {
   const { addToast } = useToast();
@@ -38,7 +38,7 @@ export const PropertyDetailsModal = ({ property, settings, onClose }: PropertyDe
     ["Furnishing", furnishingLabels[property.furnishingStatus]],
     hasValue(property.bedrooms) ? ["Bedrooms", String(property.bedrooms)] : null,
     hasValue(property.bathrooms) ? ["Bathrooms", String(property.bathrooms)] : null,
-    hasValue(property.floor) ? ["Floor", String(property.floor)] : null,
+    hasValue(property.floor) ? ["Floor", property.floor === 0 ? "Ground floor" : String(property.floor)] : null,
     property.availableFrom ? ["Available from", formatDate(property.availableFrom)] : ["Availability", "Available now"],
     property.preferredTenant ? ["Preferred tenant", humanizeEnum(property.preferredTenant)] : null
   ].filter(Boolean) as string[][];
@@ -112,7 +112,7 @@ export const PropertyDetailsModal = ({ property, settings, onClose }: PropertyDe
           {hasValue(property.bedrooms) && <span><BedDouble size={17} /> {property.bedrooms} bedroom</span>}
           {hasValue(property.bathrooms) && <span><Bath size={17} /> {property.bathrooms} bathroom</span>}
           <span><CalendarDays size={17} /> {formatDate(property.availableFrom)}</span>
-          {hasValue(property.floor) && <span><Layers size={17} /> Floor {property.floor}</span>}
+          {hasValue(property.floor) && <span><Layers size={17} /> {property.floor === 0 ? "Ground floor" : `Floor ${property.floor}`}</span>}
         </div>
 
         <div className="modal-section-grid">
@@ -165,6 +165,19 @@ export const PropertyDetailsModal = ({ property, settings, onClose }: PropertyDe
                 <li key={rule}>{rule}</li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {property.nearbyLandmarks.length > 0 && (
+          <section className="modal-section">
+            <h3>Nearby landmarks</h3>
+            <div className="amenity-list">
+              {property.nearbyLandmarks.map((landmark) => (
+                <span key={landmark}>
+                  <MapPin size={15} /> {landmark}
+                </span>
+              ))}
+            </div>
           </section>
         )}
 

@@ -1492,6 +1492,28 @@ p {
   font-weight: 800;
 }
 
+.catalogue-card-title {
+  display: block;
+  min-height: 44px;
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.catalogue-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.view-details-cue {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
 .property-details-modal {
   width: min(980px, 100%);
   padding-bottom: 86px;

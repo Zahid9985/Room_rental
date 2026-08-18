@@ -24,6 +24,7 @@ export const PropertyCard = ({ property, onOpen }: PropertyCardProps) => (
       </span>
     </div>
     <div className="property-card-body">
+      <strong className="catalogue-card-title">{property.title}</strong>
       <p className="rent-line">
         {formatCurrency(property.monthlyRent)} <span>/ month</span>
       </p>
@@ -31,7 +32,10 @@ export const PropertyCard = ({ property, onOpen }: PropertyCardProps) => (
         {property.propertyType.name} • {property.roomType || "Room"} •{" "}
         {furnishingLabels[property.furnishingStatus]}
       </p>
-      <span className="catalogue-card-code">{property.propertyCode}</span>
+      <div className="catalogue-card-footer">
+        <span className="catalogue-card-code">{property.propertyCode}</span>
+        <span className="view-details-cue">View details</span>
+      </div>
     </div>
   </button>
 );

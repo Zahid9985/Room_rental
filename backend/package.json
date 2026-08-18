@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "dummy:rooms": "tsx prisma/add-dummy-rooms.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",

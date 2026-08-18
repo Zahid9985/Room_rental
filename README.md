@@ -62,7 +62,7 @@ Copy-Item frontend/.env.example frontend/.env
 Backend:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/room_rental_app?schema=public"
+DATABASE_URL="postgresql://postgres:YOUR_POSTGRES_PASSWORD@localhost:5432/YOUR_DATABASE_NAME?schema=public"
 JWT_SECRET="replace-with-a-minimum-32-character-secret"
 PORT=4000
 NODE_ENV=development
@@ -85,7 +85,7 @@ npm run prisma:generate
 
 ## Database Setup
 
-Create the PostgreSQL database, then run:
+Create the PostgreSQL database named in `DATABASE_URL`, then run:
 
 ```powershell
 npm run prisma:migrate -w backend -- --name init
@@ -93,6 +93,12 @@ npm run seed
 ```
 
 An initial SQL migration is included at `backend/prisma/migrations/20260811120000_init/migration.sql`.
+
+To add extra Bardhaman/Burdwan demo rooms without resetting the database:
+
+```powershell
+npm run dummy:rooms
+```
 
 Development admin credentials after seeding:
 

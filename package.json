@@ -12,7 +12,8 @@
     "build": "npm run build -w backend && npm run build -w frontend",
     "lint": "npm run lint -w frontend",
     "prisma:generate": "npm run prisma:generate -w backend",
-    "seed": "npm run seed -w backend"
+    "seed": "npm run seed -w backend",
+    "dummy:rooms": "npm run dummy:rooms -w backend"
   },
   "devDependencies": {
     "concurrently": "^9.2.0"
